@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+{% block title %}តារាងលិខិត ចេញ/ចូល{% endblock %}
+{% block content %}
+
+<!-- Search and actions control deck -->
+<div id="dashboardControlDeck" class="dashboard-control-deck bg-slate-900 border border-slate-800 rounded-xl mb-2 shadow-xl text-slate-100">
+<div class="dashboard-control-section px-3 py-2">
+  <form id="dashboardFilterForm" method="GET" class="dashboard-filter-row grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+    {% if current_user.permission('can_search') %}
+    <div class="dashboard-search-field">
+      <label class="block text-xs font-medium text-green-400 mb-1">ស្វែងរក (លេខលិខិត / កម្មវត្ថុ / អង្គភាព)</label>
+      <input type="text" id="dashboardSearchInput" name="q" value="{{ q }}" placeholder="វាយអត្ថបទ..."
+             class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-2 text-xs text-white focus:border-green-500 focus:outline-none">
+    </div>
+    {% endif %}
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ស្វែងរកតាមកាលបរិច្ឆេទ ចូល</label>
+      <div class="relative">
+        <input type="text" id="dateFromText" value="{{ date_from_display or date_from }}" placeholder="dd/mm/yyyy" inputmode="numeric" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-2 pr-9 text-xs text-white focus:border-green-500 focus:outline-none">
+        <input type="hidden" id="dateFromValue" name="date_from" value="{{ date_from }}">
+        <button type="button" id="dateFromButton" class="absolute right-0 top-0 flex h-full w-8 items-center justify-center border-0 bg-transparent text-slate-400 hover:text-green-400" title="ជ្រើសរើសកាលបរិច្ឆេទ"><i class="fas fa-calendar-alt"></i></button>
+        <input type="date" id="dateFromPicker" tabindex="-1" aria-hidden="true" class="absolute right-0 top-0 h-full w-8 opacity-0 pointer-events-none">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ស្វែងរកតាមកាលបរិច្ឆេទ ចេញ</label>
+      <div class="relative">
+        <input type="text" id="dateToText" value="{{ date_to_display or date_to }}" placeholder="dd/mm/yyyy" inputmode="numeric" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-2 pr-9 text-xs text-white focus:border-green-500 focus:outline-none">
+        <input type="hidden" id="dateToValue" name="date_to" value="{{ date_to }}">
+        <button type="button" id="dateToButton" class="absolute right-0 top-0 flex h-full w-8 items-center justify-center border-0 bg-transparent text-slate-400 hover:text-green-400" title="ជ្រើសរើសកាលបរិច្ឆេទ"><i class="fas fa-calendar-alt"></i></button>
+        <input type="date" id="dateToPicker" tabindex="-1" aria-hidden="true" class="absolute right-0 top-0 h-full w-8 opacity-0 pointer-events-none">
+      </div>
+    </div>
+
+
+
+
+
+
+  <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ប្រភេទឯកសារ</label>
+      <select name="doc_type" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:border-green-500 focus:outline-none">
+        <option value="" {% if doc_type == '' %}selected{% endif %}>ទាំងអស់</option>
+        {% for t in available_doc_types %}
+        <option value="{{ t }}" {% if doc_type == t %}selected{% endif %}>{{ '-' if t == '__empty__' else t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">តម្រៀបតាម</label>
+      <select name="sort_by" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:border-green-500 focus:outline-none">
+        <option value="seq_no" {% if sort_by=='seq_no' %}selected{% endif %}>ល.រ</option>
+        <option value="doc_type" {% if sort_by=='doc_type' %}selected{% endif %}>ប្រភេទឯកសារ</option>
+        <option value="doc_number" {% if sort_by=='doc_number' %}selected{% endif %}>លេខលិខិត</option>
+        <option value="doc_date" {% if sort_by=='doc_date' %}selected{% endif %}>កាលបរិច្ឆេទលិខិត</option>
+        <option value="action_date" {% if sort_by=='action_date' %}selected{% endif %}>កាលបរិច្ឆេទ ចូល/ចេញ</option>
+        <option value="priority" {% if sort_by=='priority' %}selected{% endif %}>អាទិភាព</option>
+        <option value="status" {% if sort_by=='status' %}selected{% endif %}>ស្ថានភាព</option>
+      </select>
+    </div>
+    <div class="dashboard-filter-actions flex gap-1.5 items-end justify-end">
+      <select name="sort_dir" class="bg-slate-800 border border-slate-700 text-white rounded px-2.5 py-1 text-xs focus:border-green-500 focus:outline-none">
+        <option value="desc" {% if sort_dir=='desc' %}selected{% endif %}>ចុះ ↓</option>
+        <option value="asc" {% if sort_dir=='asc' %}selected{% endif %}>ឡើង ↑</option>
+      </select>
+      <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded text-xs font-medium transition-all">ស្វែងរក</button>
+      <a href="{{ url_for('documents.dashboard') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-2 rounded text-xs transition-all text-decoration-none">សម្អាត</a>
+    </div>
+  </form>
+</div>
+
+<!-- Form សម្រាប់គ្រប់គ្រងការលុបតាមរយៈ Checkbox និង Action Buttons -->
+<form id="bulkDeleteForm" method="POST" action="{{ url_for('documents.bulk_delete_documents') }}">
+  <div class="dashboard-control-section px-3 py-1.5 border-t border-slate-800 flex items-center justify-between flex-wrap gap-2 text-slate-100">
+    
+    <!-- Summary Info -->
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+      <span class="text-xs font-medium text-slate-300">សរុប៖ <strong class="text-white text-sm">{{ records|length }}</strong> | ជ្រើសរើស៖ <strong class="text-green-400 text-sm" id="selectedCount">0</strong></span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="{{ url_for('documents.export_xlsx', **request.args) }}"
+         class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition-all text-decoration-none">
+        <i class="fas fa-file-excel"></i> <span>Excel</span>
+      </a>
+
+      <a href="{{ url_for('documents.export_pdf', **request.args) }}" target="_blank"
+         class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition-all text-decoration-none">
+        <i class="fas fa-file-pdf"></i> <span>PDF</span>
+      </a>
+
+      {% if current_user.permission('can_add') %}
+      <a href="{{ url_for('documents.import_documents') }}"
+         class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition-all text-decoration-none">
+        <i class="fas fa-file-import"></i> <span>នាំចូល</span>
+      </a>
+      {% endif %}
+
+      {% if current_user.is_admin() and records %}
+      <button type="submit" onclick="return confirm('តើអ្នកពិតជាចង់លុបឯកសារដែលបានជ្រើសរើសទាំងអស់នេះមែនទេ?');"
+              class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/50 px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1">
+        <i class="fas fa-trash-alt"></i> <span>លុប</span>
+      </button>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Documents Table -->
+  <div class="document-table-scroll bg-slate-900 border border-slate-800 rounded-xl shadow-xl text-slate-100">
+    <table class="dashboard-document-table min-w-full text-sm" style="table-layout: fixed; width: 100%;">
+      <thead class="table-freeze-header bg-slate-800 text-green-400 text-xs uppercase text-center border-b border-slate-700">
+        <tr>
+          <th class="px-2 py-2 bg-slate-800" style="width: 50px;" rowspan="2">ល.រ</th>
+          <th class="px-2 py-2 text-center bg-slate-800" style="width: 110px;" rowspan="2">លេខលិខិត</th>
+          <th class="px-2 py-2 bg-slate-800" style="width: 105px;" rowspan="2">កាលបរិច្ឆេទលិខិត</th>
+          <th class="px-2 py-2 text-left bg-slate-800" style="width: 250px;" rowspan="2">កម្មវត្ថុ</th>
+          <th class="px-2 py-2 text-left bg-slate-800" style="width: 150px;" rowspan="2">អង្គភាព</th>
+          <th class="px-2 py-2 bg-slate-800" style="width: 65px;" rowspan="2">ចំនួន</th>
+          <th class="px-2 py-2 bg-slate-800" style="width: 90px;" rowspan="2">អាទិភាពលិខិត</th>
+          <th class="px-2 py-2 bg-slate-800" style="width: 95px;" rowspan="2">ប្រភេទឯកសារ</th>
+          <th class="px-2 py-2 border-b border-slate-700 bg-slate-800" colspan="2">កាលបរិច្ឆេទ</th>
+          <th class="px-2 py-2 border-b border-slate-700 bg-slate-800" colspan="2">ម៉ោង</th>
+          <th class="px-2 py-2 bg-slate-800" style="width: 90px;" rowspan="2">ស្ថានភាព</th>
+          <th class="px-2 py-2 text-center bg-slate-800" style="width: 120px;" rowspan="2">កំណត់សម្គាល់</th>
+          <th class="px-2 py-2 text-center bg-slate-800" style="width: 120px;" rowspan="2">ផ្សេងៗ</th>
+          
+          <!-- ជួរឈរ "សកម្មភាព" ដែលមានប្រអប់ Select All ដាក់នៅទីនេះ -->
+          <th class="px-2 py-2 bg-slate-800 text-center" style="width: 130px;" rowspan="2">
+            <div class="flex items-center justify-center gap-1.5">
+              <span>សកម្មភាព</span>
+              {% if current_user.is_admin() %}
+              <input type="checkbox" id="selectAll" class="rounded cursor-pointer accent-green-500" title="ជ្រើសរើសទាំងអស់">
+              {% endif %}
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th class="px-1 py-1.5 border-t border-slate-700 text-[11px] text-slate-300 bg-slate-800" style="width: 95px;">ចូល</th>
+          <th class="px-1 py-1.5 border-t border-slate-700 text-[11px] text-slate-300 bg-slate-800" style="width: 95px;">ចេញ</th>
+          <th class="px-1 py-1.5 border-t border-slate-700 text-[11px] text-slate-300 bg-slate-800" style="width: 75px;">ចូល</th>
+          <th class="px-1 py-1.5 border-t border-slate-700 text-[11px] text-slate-300 bg-slate-800" style="width: 75px;">ចេញ</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800 text-center">
+        {% for r in records %}
+        <tr class="hover:bg-slate-800/50 cursor-pointer transition-colors" onclick="showDocDetail({{ r.id }})">
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ loop.index }}</td>
+          <td class="px-2 py-2 font-medium text-center text-white" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.doc_number }}">{{ r.doc_number or '-' }}</td>
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.doc_date.strftime('%d-%m-%Y') if r.doc_date else '-' }}</td>
+          
+          <td class="px-2 py-2 text-left text-slate-200" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.subject }}">
+            {{ r.subject or '-' }}
+          </td>
+          
+          <td class="px-2 py-2 text-left text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.unit }}">
+            {{ r.unit or '-' }}
+          </td>
+          
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.quantity if r.quantity is not none else '-' }}</td>
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.priority }}">{{ r.priority or '-' }}</td>
+          <td class="px-2 py-2" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <span class="bg-slate-800 text-green-400 border border-slate-700 px-2 py-0.5 rounded text-xs font-semibold">{{ r.doc_type or '-' }}</span>
+          </td>
+          
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {% if r.in_date %}
+                  {{ r.in_date.strftime('%d-%m-%Y') }}
+                {% else %}
+                    null
+                {% endif %}
+          </td>
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {% if r.out_date %}
+                  {{ r.out_date.strftime('%d-%m-%Y') }}
+                {% else %}
+                    null
+                {% endif %}
+          </td>
+          
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {% if r.in_time %}
+                  {{ r.in_time.strftime('%H:%M') }}
+                {% else %}
+                    null
+                {% endif %}
+          </td>
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {% if r.out_time %}
+                  {{ r.out_time.strftime('%H:%M') }}
+                {% else %}
+                    null
+                {% endif %}
+          </td>
+
+          <td class="px-2 py-2 text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.status }}">{{ r.status or '-' }}</td>
+          
+          <td class="px-2 py-2 text-center text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.remarks }}">
+            {{ r.remarks or '-' }}
+          </td>
+          
+          <td class="px-2 py-2 text-center text-slate-300" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.others }}">
+            {{ r.others or '-' }}
+          </td>
+          
+          <!-- ជួរឈរ "សកម្មភាព" ដែលមានប៊ូតុងកែប្រែ, Checkbox និងប៊ូតុងលុប -->
+          <td class="px-2 py-2 whitespace-nowrap text-center" style="overflow: hidden;" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-center gap-1.5">
+              {% if current_user.permission('can_edit') %}
+              <a href="{{ url_for('documents.edit_document', doc_id=r.id) }}" class="text-blue-400 hover:text-blue-300 hover:underline text-xs font-medium">កែប្រែ   |</a>
+              {% endif %}
+
+              {% if current_user.is_admin() %}
+              <input type="checkbox" name="document_ids" value="{{ r.id }}" class="rounded cursor-pointer row-checkbox accent-green-500">
+              {% endif %}
+
+              {% if current_user.is_admin() %}
+              <form method="POST" action="{{ url_for('documents.delete_document', doc_id=r.id) }}" class="inline"
+                    onsubmit="return confirm('លុបកំណត់ត្រានេះសិនមែនទេ?');">
+                <button type="submit" class="text-red-400 hover:text-red-300 hover:underline text-xs font-medium">លុប</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="17" class="px-3 py-6 text-center text-slate-500">មិនមានទិន្នន័យ</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<!-- Detail popup modal -->
+<div id="docDetailModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="document-detail-modal bg-slate-900 border border-slate-800 text-white rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl">
+    <div class="document-detail-heading flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+      <h2 class="font-bold text-lg text-green-400">លម្អិតឯកសារ</h2>
+      <button type="button" onclick="closeDocDetail()" class="bg-slate-800 hover:bg-red-600 text-slate-300 border border-slate-700 px-4 py-2 rounded-lg text-sm">បិទ</button>
+    </div>
+    <dl id="docDetailBody" class="document-detail-grid grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"></dl>
+    <div class="document-detail-actions mt-6 flex justify-end pt-3 border-t border-slate-800">
+    </div>
+  </div>
+</div>
+
+<!-- QR Code Modal for Dashboard -->
+<div class="modal fade" id="dashboardQrModal" tabindex="-1" aria-labelledby="dashboardQrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-slate-900 text-white border border-slate-800">
+      <div class="modal-header border-slate-800">
+        <h5 class="modal-title text-green-400 font-bold" id="dashboardQrModalLabel"><i class="fas fa-qrcode me-2"></i> ស្កេនដើម្បីប្រើប្រាស់ប្រព័ន្ធ</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="text-slate-300 mb-3 text-xs">ប្រើប្រាស់ទូរស័ព្ទដៃ ឬកុំព្យូទ័រផ្សេងទៀតក្នុង Wi-Fi ជាមួយគ្នាដើម្បីស្កេនតំណភ្ជាប់ខាងក្រោម៖</p>
+        <div class="bg-white p-3 d-inline-block rounded shadow">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ server_url }}" alt="Server QR Code" class="img-fluid">
+        </div>
+        <p class="mt-3 font-monospace text-green-400 font-bold text-sm">{{ server_url }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setupDatePicker(textId, pickerId, valueId, buttonId) {
+  const textInput = document.getElementById(textId);
+  const pickerInput = document.getElementById(pickerId);
+  const valueInput = document.getElementById(valueId);
+  const pickerButton = document.getElementById(buttonId);
+  const filterForm = document.getElementById("dashboardFilterForm");
+  if (!textInput || !pickerInput || !valueInput || !pickerButton) return;
+
+  function toIso(value) {
+    const match = value.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);
+    return match ? `${match[3]}-${match[2]}-${match[1]}` : "";
+  }
+
+  function toDisplay(value) {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : "";
+  }
+
+  const initialIso = toIso(textInput.value) || textInput.value;
+  pickerInput.value = initialIso;
+  if (initialIso !== textInput.value) textInput.value = toDisplay(initialIso);
+  if (!valueInput.value && pickerInput.value) valueInput.value = pickerInput.value;
+  function openPicker() {
+    if (typeof pickerInput.showPicker === "function") pickerInput.showPicker();
+    else pickerInput.focus();
+  }
+
+  textInput.addEventListener("click", openPicker);
+  pickerButton.addEventListener("click", openPicker);
+  pickerInput.addEventListener("change", () => {
+    textInput.value = toDisplay(pickerInput.value);
+    valueInput.value = pickerInput.value;
+    if (filterForm) filterForm.requestSubmit();
+  });
+
+  textInput.addEventListener("input", () => {
+    valueInput.value = toIso(textInput.value);
+  });
+}
+
+setupDatePicker("dateFromText", "dateFromPicker", "dateFromValue", "dateFromButton");
+setupDatePicker("dateToText", "dateToPicker", "dateToValue", "dateToButton");
+
+const dashboardControlsToggle = document.getElementById("dashboardControlsToggle");
+const dashboardControlDeck = document.getElementById("dashboardControlDeck");
+if (dashboardControlsToggle && dashboardControlDeck) {
+  const updateDashboardControlsIcon = function (isCollapsed) {
+    dashboardControlsToggle.innerHTML = '<i class="fas fa-search" aria-hidden="true"></i><i class="fas fa-chevron-' + (isCollapsed ? 'down' : 'up') + '" aria-hidden="true"></i><span class="sr-only">លាក់/បង្ហាញផ្ទាំងស្វែងរក</span>';
+  };
+  const controlsCollapsed = localStorage.getItem("dashboardControlsCollapsed") === "true";
+  dashboardControlDeck.classList.toggle("dashboard-controls-collapsed", controlsCollapsed);
+  dashboardControlsToggle.setAttribute("aria-expanded", String(!controlsCollapsed));
+  updateDashboardControlsIcon(controlsCollapsed);
+
+  dashboardControlsToggle.addEventListener("click", function () {
+    const isCollapsed = dashboardControlDeck.classList.toggle("dashboard-controls-collapsed");
+    dashboardControlsToggle.setAttribute("aria-expanded", String(!isCollapsed));
+    updateDashboardControlsIcon(isCollapsed);
+    localStorage.setItem("dashboardControlsCollapsed", String(isCollapsed));
+  });
+}
+
+const dashboardSearchInput = document.getElementById("dashboardSearchInput");
+const dashboardFilterForm = document.getElementById("dashboardFilterForm");
+let dashboardSearchTimer;
+if (dashboardSearchInput && dashboardFilterForm) {
+  dashboardSearchInput.focus();
+  dashboardSearchInput.setSelectionRange(dashboardSearchInput.value.length, dashboardSearchInput.value.length);
+  dashboardSearchInput.addEventListener("input", function () {
+    clearTimeout(dashboardSearchTimer);
+    dashboardSearchTimer = setTimeout(function () {
+      dashboardFilterForm.requestSubmit();
+    }, 300);
+  });
+}
+
+const DOC_RECORDS = {
+  {% for r in records %}
+  {{ r.id }}: {{ r.to_dict() | tojson }},
+  {% endfor %}
+};
+
+const DOC_FIELD_LABELS = {
+  seq_no: "ល.រ", doc_number: "លេខលិខិត", doc_date: "កាលបរិច្ឆេទលិខិត",
+  subject: "កម្មវត្ថុ", unit: "អង្គភាព", quantity: "ចំនួន", priority: "អាទិភាពលិខិត",
+  doc_type: "ប្រភេទឯកសារ", in_date: "កាលបរិច្ឆេទ ចូល", out_date: "កាលបរិច្ឆេទ ចេញ",
+  in_time: "ម៉ោង ចូល", out_time: "ម៉ោង ចេញ", status: "ស្ថានភាព",
+  remarks: "កំណត់សម្គាល់", others: "ផ្សេងៗ", created_by: "អ្នកបញ្ចូល"
+};
+
+const IS_ADMIN = {{ 'true' if current_user.is_admin() else 'false' }};
+
+function showDocDetail(id) {
+  const rec = DOC_RECORDS[id];
+  if (!rec) return;
+  const body = document.getElementById("docDetailBody");
+  body.innerHTML = "";
+  
+  for (const key in DOC_FIELD_LABELS) {
+    let val = rec[key];
+    if (val === null || val === undefined || val === "") val = "-";
+    const wrap = document.createElement("div");
+    
+    if (key === "subject" || key === "remarks" || key === "others") {
+      wrap.className = "document-detail-field document-detail-field-wide md:col-span-2";
+    } else {
+      wrap.className = "document-detail-field";
+    }
+
+    wrap.innerHTML = '<dt class="document-detail-label text-xs font-medium">' + DOC_FIELD_LABELS[key] +
+      '</dt><dd class="document-detail-value text-slate-100 whitespace-pre-wrap break-words mt-0.5">' + val + '</dd>';
+    body.appendChild(wrap);
+  }
+
+  if (IS_ADMIN && rec.audit_logs && rec.audit_logs.length > 0) {
+    const logWrap = document.createElement("div");
+    logWrap.className = "md:col-span-2 mt-4 pt-3 border-t border-slate-800";
+    
+    let logsHtml = '';
+    rec.audit_logs.forEach(log => {
+      let actionText = log.action === 'create' ? 'បានបង្កើត' : (log.action === 'edit' ? 'បានកែប្រែ' : 'បានលុប');
+      logsHtml += `<div class="text-xs py-1.5 border-b border-red-900/30 flex justify-between items-center">
+                     <span>🔴 <b>${log.full_name || log.username}</b> ${actionText} <span class="text-slate-400">(${log.detail || ''})</span></span>
+                     <span class="text-red-300 font-mono text-[11px]">${log.created_at}</span>
+                   </div>`;
+    });
+
+    logWrap.innerHTML = `
+      <details class="group bg-red-950/20 border border-red-500/50 rounded-lg p-3 hover:bg-red-950/30 transition-all">
+        <summary class="flex justify-between items-center cursor-pointer text-red-400 font-bold text-xs select-none">
+          <span>🛡️ មើលប្រវត្តិនៃការកែប្រែ និងលុបឯកសារ (Admin Only)</span>
+          <span class="transition-transform group-open:rotate-180">▼</span>
+        </summary>
+        <div class="mt-2 space-y-1 text-slate-200">
+          ${logsHtml}
+        </div>
+      </details>
+    `;
+    body.appendChild(logWrap);
+  }
+
+  document.getElementById("docDetailModal").classList.remove("hidden");
+}
+
+function closeDocDetail() {
+  document.getElementById("docDetailModal").classList.add("hidden");
+}
+
+document.getElementById("docDetailModal").addEventListener("click", function (event) {
+  if (event.target === this) closeDocDetail();
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const selectAll = document.getElementById("selectAll");
+  const checkboxes = document.querySelectorAll(".row-checkbox");
+  const selectedCountEl = document.getElementById("selectedCount");
+
+  function updateSelectedCount() {
+    if (!selectedCountEl) return;
+    const checkedCount = document.querySelectorAll(".row-checkbox:checked").length;
+    selectedCountEl.textContent = checkedCount;
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelectedCount();
+    });
+  }
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", updateSelectedCount);
+  });
+});
+</script>
+{% endblock %}

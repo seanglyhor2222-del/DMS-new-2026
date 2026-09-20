@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}{{ 'កែប្រែលិខិត' if mode == 'edit' else 'បញ្ចូលលិខិតថ្មី' }}{% endblock %}
+{% block content %}
+
+<div class="bg-slate-900 border border-slate-800 rounded-lg shadow-xl p-6 w-full text-slate-100">
+  <h1 class="text-xl font-bold mb-6 text-green-400 border-b border-slate-800 pb-3">
+    {{ 'កែប្រែលិខិត' if mode == 'edit' else 'បញ្ចូលលិខិតថ្មី' }}
+  </h1>
+
+  <form method="POST" class="document-form space-y-4">
+
+    {% if mode == 'edit' and current_user.is_admin() %}
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ល.រ (Admin only)</label>
+      <input type="number" name="seq_no" value="{{ record.seq_no }}" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+    </div>
+    {% endif %}
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">លេខលិខិត</label>
+      {% set doc_number_editable = current_user.is_admin() or settings.doc_number_mode == 'manual' %}
+      <input type="text" name="doc_number"
+             value="{{ record.doc_number if record else '' }}"
+             {% if not doc_number_editable %}readonly placeholder="(បង្កើតដោយស្វ័យប្រវត្ត)"{% endif %}
+             class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white {% if not doc_number_editable %}bg-slate-900 text-slate-400{% endif %} {% if doc_number_error %}border-red-500{% endif %}">
+      {% if doc_number_error %}
+      <p class="text-xs text-red-400 font-medium mt-1">⚠️ {{ doc_number_error }}</p>
+      {% endif %}
+      <p class="text-[10px] text-slate-500 mt-1">
+        របៀបបច្ចុប្បន្ន៖ {{ 'ស្វ័យប្រវត្តិ' if settings.doc_number_mode == 'auto' else 'បញ្ចូលដោយខ្លួនឯង' }}
+      </p>
+    </div>
+
+    <div class="date-time-field">
+      <label for="docDate" class="block text-xs font-medium text-green-400 mb-1">កាលបរិច្ឆេទលិខិត</label>
+      <input type="date" name="doc_date"
+             id="docDate"
+             value="{{ record.doc_date.isoformat() if record and record.doc_date else today }}"
+             class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">
+        កម្មវត្ថុ
+        {% if current_user.permission('can_scan_ocr') %}
+        <button type="button" id="btnScan" class="ml-2 text-green-400 hover:underline text-xs">📷 ស្កេនតាមទូរស័ព្ទ</button>
+        {% endif %}
+      </label>
+      <textarea name="subject" id="subjectField" rows="2"
+                class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white overflow-hidden resize-none">{{ record.subject if record else '' }}</textarea>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">អង្គភាព</label>
+      {% set field_name = 'unit' %}
+      {% set current_value = record.unit if record else '' %}
+      {% set options = lookups.unit %}
+      {% set free_text = true %}
+      {% include "_dropdown_or_free.html" %}
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ចំនួន</label>
+      <input type="number" name="quantity" value="{{ record.quantity if record and record.quantity is not none else '' }}"
+             class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">អាទិភាពលិខិត</label>
+      {% set field_name = 'priority' %}
+      {% set current_value = record.priority if record else '' %}
+      {% set options = lookups.priority %}
+      {% set free_text = true %}
+      {% include "_dropdown_or_free.html" %}
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ប្រភេទឯកសារ</label>
+      {% set field_name = 'doc_type' %}
+      {% set current_value = record.doc_type if record else '' %}
+      {% set options = lookups.doc_type %}
+      {% set free_text = true %}
+      {% include "_dropdown_or_free.html" %}
+    </div>
+
+    <!-- កាលបរិច្ឆេទ ចូល & ចេញ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="inDateBlock" class="date-time-field">
+        <label for="inDate" class="block text-xs font-medium text-green-400 mb-1">កាលបរិច្ឆេទ ចូល</label>
+        <input type="date" name="in_date"
+               id="inDate"
+               value="{{ record.in_date.isoformat() if record and record.in_date else '' }}"
+               class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+      </div>
+      <div id="outDateBlock" class="date-time-field">
+        <label for="outDate" class="block text-xs font-medium text-green-400 mb-1">កាលបរិច្ឆេទ ចេញ</label>
+        <input type="date" name="out_date"
+               id="outDate"
+               value="{{ record.out_date.isoformat() if record and record.out_date else '' }}"
+               class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+      </div>
+    </div>
+
+    <!-- ម៉ោង ចូល & ចេញ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="inTimeBlock" class="date-time-field">
+        <label for="inTime" class="block text-xs font-medium text-green-400 mb-1">ម៉ោង ចូល</label>
+        <input type="time" name="in_time"
+               id="inTime"
+               value="{{ record.in_time.strftime('%H:%M') if record and record.in_time else '' }}"
+               class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+      </div>
+      <div id="outTimeBlock" class="date-time-field">
+        <label for="outTime" class="block text-xs font-medium text-green-400 mb-1">ម៉ោង ចេញ</label>
+        <input type="time" name="out_time"
+               id="outTime"
+               value="{{ record.out_time.strftime('%H:%M') if record and record.out_time else '' }}"
+               class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ស្ថានភាព</label>
+      {% set field_name = 'status' %}
+      {% set current_value = record.status if record else '' %}
+      {% set options = lookups.status %}
+      {% set free_text = true %}
+      {% include "_dropdown_or_free.html" %}
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">កំណត់សម្គាល់</label>
+      <textarea name="remarks" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white overflow-hidden resize-none">{{ record.remarks if record else '' }}</textarea>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-green-400 mb-1">ផ្សេងៗ</label>
+      <textarea name="others" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white overflow-hidden resize-none">{{ record.others if record else '' }}</textarea>
+    </div>
+
+    <div class="flex gap-3 pt-4 border-t border-slate-800">
+      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded text-sm font-medium">
+        {{ 'រក្សាទុកការកែប្រែ' if mode == 'edit' else 'រក្សាទុក' }}
+      </button>
+      <a href="{{ url_for('documents.dashboard') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-5 py-2 rounded text-sm">បោះបង់</a>
+    </div>
+  </form>
+</div>
+
+<div id="scanModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 w-full max-w-sm text-center text-white">
+    <h2 class="font-bold mb-2 text-green-400">ស្កេនកូដដោយទូរស័ព្ទ</h2>
+    <p class="text-xs text-slate-400 mb-3">បើកកាមេរ៉ាទូរស័ព្ទ ស្កេន QR នេះ រួចថតឯកសារ។ អត្ថបទនឹងបញ្ចូលដោយស្វ័យប្រវត្តទីនេះភ្លាមៗ។</p>
+    <img id="qrImage" alt="QR" class="mx-auto mb-3 border border-slate-700 rounded bg-white p-2">
+    <p class="text-xs break-all text-slate-400" id="mobileUrlText"></p>
+    <p id="scanStatus" class="text-sm text-green-400 mt-3 hidden">✅ បានទទួលអត្ថបទ! កំពុងបំពេញ...</p>
+    <p id="scanWarning" class="text-xs text-amber-400 bg-amber-950/50 border border-amber-800 rounded p-2 mt-2 hidden"></p>
+    <button type="button" id="btnCloseScan" class="mt-4 bg-slate-800 border border-slate-700 px-4 py-2 rounded text-sm text-white">បិទ</button>
+  </div>
+</div>
+
+<div id="ocrLoadingOverlay" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+  <div class="animate-spin rounded-full h-16 w-16 border-4 border-solid border-green-500 border-t-transparent mb-4"></div>
+  <p class="text-white text-lg font-medium">កំពុងអានអត្ថបទ និងកែសម្រួលដោយ AI...</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      // មុខងារ Auto-resize សម្រាប់ Textarea ទាំងអស់
+      const textareas = document.querySelectorAll("textarea");
+      textareas.forEach(textarea => {
+        function autoResize() {
+          this.style.height = "auto";
+          this.style.height = (this.scrollHeight + 4) + "px";
+        }
+        autoResize.call(textarea);
+        textarea.addEventListener("input", autoResize);
+      });
+
+      document.querySelectorAll(".date-time-field").forEach(function(field) {
+        const input = field.querySelector("input[type='date'], input[type='time']");
+        if (!input) return;
+        function openPicker() {
+          if (typeof input.showPicker === "function") {
+            try { input.showPicker(); } catch (error) { /* Picker may already be open. */ }
+          }
+        }
+        input.addEventListener("click", openPicker);
+        field.addEventListener("click", function(event) {
+          if (event.target === input) return;
+          input.focus();
+          openPicker();
+        });
+      });
+
+      // មុខងារឆែកមើលថាបើកលើទូរស័ព្ទដៃឬទេ
+      function isMobileDevice() {
+          return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      const btnScan = document.getElementById("btnScan");
+      const scanModal = document.getElementById("scanModal");
+
+      if (btnScan) {
+          btnScan.addEventListener("click", function() {
+              if (isMobileDevice()) {
+                  fetch('/api/ocr/session/new', { method: 'POST' })
+                      .then(response => response.json())
+                      .then(data => {
+                          if (data.code) {
+                              window.location.href = '/mobile/' + data.code;
+                          } else {
+                              alert("❌ មិនអាចបង្កើត Session ស្កេនបានទេ");
+                          }
+                      })
+                      .catch(() => {
+                          alert("❌ មានបញ្ហាក្នុងការភ្ជាប់បណ្តាញ។");
+                      });
+              } else {
+                  if (scanModal) scanModal.classList.remove("hidden");
+              }
+          });
+      }
+
+      if (typeof io !== 'undefined') {
+          const socket = io();
+          socket.on('ocr_result', function(data) {
+              const loadingOverlay = document.getElementById('ocrLoadingOverlay');
+              if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+
+              const scanModal = document.getElementById('scanModal');
+              if (scanModal) scanModal.classList.add('hidden');
+
+              if (data.warning) {
+                  console.warn("OCR fallback:", data.warning);
+                  alert("⚠️ អត្ថបទបានស្កេនរួច ប៉ុន្តែគុណភាពប្រហែលជាមិនល្អ៖\n" + data.warning);
+              }
+
+              setTimeout(() => {
+                  const subjectField = document.getElementById('subjectField');
+                  if (subjectField) {
+                      subjectField.value = data.text ? data.text.trim() : "";
+                      subjectField.style.height = "auto";
+                      subjectField.style.height = (subjectField.scrollHeight + 4) + "px";
+                  }
+                  if (loadingOverlay) loadingOverlay.classList.add('hidden');
+              }, 600);
+          });
+      }
+  });
+
+  setTimeout(function() {
+      let alerts = document.querySelectorAll('.alert');
+      alerts.forEach(function(alert) {
+          alert.style.transition = "opacity 0.5s ease";
+          alert.style.opacity = "0";
+          setTimeout(function() {
+              alert.remove();
+          }, 500);
+      });
+  }, 3000);
+</script>
+
+{% endblock %}

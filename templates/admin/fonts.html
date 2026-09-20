@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}គ្រប់គ្រងពុម្ពអក្សរ{% endblock %}
+{% block content %}
+
+<style>
+  {% for f in fonts %}
+  @font-face {
+    font-family: 'preview-{{ f.id }}';
+    src: url('{{ url_for('static', filename='fonts/' + f.stored_filename) }}');
+    font-display: swap;
+  }
+  {% endfor %}
+</style>
+
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-6 border border-slate-200 dark:border-slate-700">
+  <h1 class="text-lg font-bold mb-1 text-slate-800 dark:text-slate-100">🔤 គ្រប់គ្រងពុម្ពអក្សរខ្មែរ</h1>
+  <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+    ប្រសិនបើអត្ថបទស្កេនបង្ហាញអក្សរខុសរូបរាង ឬពុម្ពអក្សរនៃឯកសារដើមមិនមាននៅលើម៉ាស៊ីននេះទេ
+    សូមបញ្ចូលឯកសារពុម្ពអក្សរ (.ttf / .otf / .woff) ដែលត្រូវនឹងឯកសារនោះ ទុកនៅទីនេះ។
+    ប្រព័ន្ធនឹងរក្សាទុកវានៅក្នុងថតឯកសារ <code class="bg-slate-100 dark:bg-slate-900 px-1 rounded">static/fonts</code>
+    ហើយបង្ហាញអត្ថបទដោយប្រើពុម្ពអក្សរនោះភ្លាមៗ ដោយមិនចាំបាច់ដំឡើងអ្វីលើកុំព្យូទ័រនីមួយៗឡើយ។
+  </p>
+
+  <form method="POST" action="{{ url_for('admin.upload_font') }}" enctype="multipart/form-data"
+    class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+    <div class="md:col-span-2">
+      <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1">ឯកសារពុម្ពអក្សរ (.ttf .otf .woff
+        .woff2)</label>
+      <input type="file" name="font_file" accept=".ttf,.otf,.woff,.woff2" required
+        class="w-full border dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1">ឈ្មោះបង្ហាញ (ស្រេចចិត្ត)</label>
+      <input type="text" name="display_name" placeholder="ឧ. Khmer OS Muol Light"
+        class="w-full border dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+    </div>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+      ⬆️ បន្ថែមពុម្ពអក្សរ
+    </button>
+  </form>
+</div>
+
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-x-auto border border-slate-200 dark:border-slate-700">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-xs uppercase">
+      <tr>
+        <th class="px-3 py-2 text-left">ឈ្មោះឯកសារ</th>
+        <th class="px-3 py-2 text-left">មើលសាកល្បង (Preview)</th>
+        <th class="px-3 py-2 text-left">ស្ថានភាព</th>
+        <th class="px-3 py-2 text-left">សកម្មភាព</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+      {% for f in fonts %}
+      <tr>
+        <td class="px-3 py-2 font-medium align-top text-slate-800 dark:text-slate-100">
+          {{ f.original_filename }}
+          <div class="text-xs text-slate-400">{{ f.family_name }}</div>
+        </td>
+        <td class="px-3 py-2 align-top text-slate-800 dark:text-slate-100">
+          <span
+            style="font-family: 'preview-{{ f.id }}', 'Noto Sans Khmer', sans-serif; font-size: 20px; font-weight: bold;">
+            ព្រះរាជាណាចក្រកម្ពុជា ០១២៣៤៥៦៧៨៩
+          </span>
+        </td>
+        <td class="px-3 py-2 align-top">
+          {% if f.is_default %}
+          <span
+            class="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-0.5 rounded text-xs">កំពុងប្រើ
+            (លំនាំដើម)</span>
+          {% else %}
+          <span class="text-slate-400 text-xs">មិនទាន់កំណត់</span>
+          {% endif %}
+        </td>
+        <td class="px-3 py-2 whitespace-nowrap align-top">
+          {% if f.is_default %}
+          <form method="POST" action="{{ url_for('admin.unset_default_font', font_id=f.id) }}" class="inline">
+            <button type="submit"
+              class="text-slate-600 dark:text-slate-300 hover:underline text-xs">លែងប្រើជាលំនាំដើម</button>
+          </form>
+          {% else %}
+          <form method="POST" action="{{ url_for('admin.set_default_font', font_id=f.id) }}" class="inline">
+            <button type="submit"
+              class="text-blue-600 dark:text-blue-400 hover:underline text-xs">កំណត់ជាលំនាំដើម</button>
+          </form>
+          {% endif %}
+          <form method="POST" action="{{ url_for('admin.delete_font', font_id=f.id) }}" class="inline ml-2"
+            onsubmit="return confirm('លុបពុម្ពអក្សរនេះ?');">
+            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline text-xs">លុប</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" class="px-3 py-6 text-center text-slate-400">មិនទាន់មានពុម្ពអក្សរនៅឡើយទេ</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-xs text-slate-400 mt-3">
+  *ការកំណត់ពុម្ពអក្សរណាមួយជា "លំនាំដើម" នឹងផ្លាស់ប្តូររូបរាងអក្សរនៅលើគ្រប់ទំព័រទាំងអស់ក្នុងប្រព័ន្ធ
+  រួមទាំងប្រអប់អត្ថបទស្កេន (OCR) ផងដែរ។
+</p>
+{% endblock %}

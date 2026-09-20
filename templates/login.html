@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ចូលប្រើប្រព័ន្ធ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  (function () {
+    var saved = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>body{font-family:'Noto Sans Khmer','Segoe UI',sans-serif;}</style>
+</head>
+<body class="login-page">
+  <div class="login-stars" id="loginStars" aria-hidden="true"></div>
+  <div class="login-glow login-glow-one" aria-hidden="true"></div>
+  <div class="login-glow login-glow-two" aria-hidden="true"></div>
+  <button type="button" id="themeToggleBtn" class="theme-toggle-btn login-theme-toggle" title="ប្តូររចនាបថភ្លឺ/ងងឹត" aria-label="ប្តូររចនាបថភ្លឺ/ងងឹត">
+    <i class="fas fa-moon" aria-hidden="true"></i>
+  </button>
+  <main class="login-layout">
+    <section class="login-card" aria-labelledby="loginTitle">
+
+
+      <h1 id="loginTitle">ប្រព័ន្ធគ្រប់គ្រងលិខិត</h1>
+      <p class="login-subtitle">ចូលប្រើគណនីរបស់អ្នក</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="login-alert" role="alert">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="login-form">
+      <label for="username">ឈ្មោះអ្នកប្រើ</label>
+      <div class="login-input-wrap">
+        <span class="login-field-icon" aria-hidden="true">&#128100;</span>
+        <input id="username" type="text" name="username" required autofocus autocomplete="username" placeholder="បញ្ចូលឈ្មោះអ្នកប្រើ">
+      </div>
+
+      <label for="password">ពាក្យសម្ងាត់</label>
+      <div class="login-input-wrap">
+        <span class="login-field-icon" aria-hidden="true">&#128273;</span>
+        
+        <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="បញ្ចូលពាក្យសម្ងាត់">
+      </div>
+
+      <button type="submit" class="login-submit">
+        <span>ចូលប្រើប្រព័ន្ធ</span><span aria-hidden="true">→</span>
+      </button>
+    </form>
+      <p class="login-footer">If don't have an account? <span aria-hidden="true">•</span> call 911</p>
+    </section>
+  </main>
+<script>
+  (function () {
+    var btn = document.getElementById('themeToggleBtn');
+    function sync() {
+      var isDark = document.documentElement.classList.contains('dark');
+      btn.innerHTML = isDark
+        ? '<i class="fas fa-sun" aria-hidden="true"></i>'
+        : '<i class="fas fa-moon" aria-hidden="true"></i>';
+    }
+    sync();
+    btn.addEventListener('click', function () {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      sync();
+    });
+  })();
+
+  (function () {
+    var field = document.getElementById('loginStars');
+    if (!field) return;
+    var fragment = document.createDocumentFragment();
+    for (var index = 0; index < 75; index += 1) {
+      var star = document.createElement('span');
+      star.className = 'login-star';
+      star.style.left = (Math.random() * 100) + '%';
+      star.style.top = (Math.random() * 100) + '%';
+      star.style.animationDelay = (Math.random() * 5) + 's';
+      star.style.animationDuration = (3 + Math.random() * 4) + 's';
+      fragment.appendChild(star);
+    }
+    field.appendChild(fragment);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}ប្រវត្តិសកម្មភាព{% endblock %}
+{% block content %}
+
+<h1 class="text-lg font-bold mb-4">
+  🕓 ប្រវត្តិសកម្មភាព {% if target_user %}របស់ {{ target_user.full_name or target_user.username }}{% endif %}
+</h1>
+
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+      <tr>
+        <th class="px-3 py-2 text-left">ពេលវេលា</th>
+        {% if not target_user %}<th class="px-3 py-2 text-left">អ្នកប្រើ</th>{% endif %}
+        <th class="px-3 py-2 text-left">សកម្មភាព</th>
+        <th class="px-3 py-2 text-left">លម្អិត</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y">
+      {% for log in logs %}
+      <tr>
+        <td class="px-3 py-2 whitespace-nowrap">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        {% if not target_user %}<td class="px-3 py-2">{{ log.user.username if log.user else '-' }}</td>{% endif %}
+        <td class="px-3 py-2">{{ log.action }}</td>
+        <td class="px-3 py-2">{{ log.detail }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="px-3 py-6 text-center text-slate-400">មិនមានប្រវត្តិ</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

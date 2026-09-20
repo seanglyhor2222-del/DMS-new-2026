@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}របាយការណ៍ឯកសារ{% endblock %}
+{% block content %}
+
+<div class="flex items-center justify-between gap-3 flex-wrap mb-4">
+  <div>
+    <h1 class="text-lg font-bold">របាយការណ៍ឯកសារ</h1>
+    <p class="text-xs text-slate-500 mt-1">សរុបចំនួន {{ records|length }} កំណត់ត្រា</p>
+  </div>
+  <button type="button" onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm">
+    <i class="fas fa-print mr-1"></i> បោះពុម្ព
+  </button>
+</div>
+
+<form method="GET" class="report-filter-form bg-white rounded-lg shadow p-4 mb-5">
+  <div class="report-filter-actions">
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm" aria-label="ស្វែងរក"><i class="fas fa-search mr-1"></i> ស្វែងរក</button>
+    <a href="{{ url_for('admin.reports') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded text-sm text-decoration-none inline-flex items-center justify-center" title="សម្អាត" aria-label="សម្អាត"><i class="fas fa-broom mr-1"></i> សម្អាត</a>
+  </div>
+
+  <div class="report-search-field">
+    <label for="reportSearch" class="block text-xs font-medium text-slate-600 mb-1"></label>
+    <input id="reportSearch" name="search" value="{{ filters.search }}" class="w-full border rounded px-3 py-2 text-sm" placeholder="ស្វែងរក (លេខលិខិត / កម្មវត្ថុ / អង្គភាព)">
+  </div>
+
+</form>
+
+{% set headings = [('seq_no', 'ល.រ'), ('doc_number', 'លេខលិខិត'), ('doc_date', 'កាលបរិច្ឆេទលិខិត'), ('subject', 'កម្មវត្ថុ'), ('unit', 'អង្គភាព'), ('quantity', 'ចំនួន'), ('priority', 'អាទិភាពលិខិត'), ('doc_type', 'ប្រភេទ'), ('action_date', 'កាលបរិច្ឆេទ'), ('action_time', 'ម៉ោង'), ('status', 'ស្ថានភាព'), ('created_by', 'អ្នកបញ្ចូល')] %}
+<div class="bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-x-auto text-slate-100">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-800 text-green-400 text-xs text-center border-b border-slate-700">
+      <tr>
+        {% for key, label in headings[:8] %}
+        <th class="px-2 py-3" rowspan="2"><a href="{{ sort_links[key] }}" class="text-green-400 text-decoration-none">{{ label }} {% if sort_by == key %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}</a></th>
+        {% endfor %}
+        <th class="px-2 py-3 border-b border-slate-700" colspan="2">កាលបរិច្ឆេទ</th>
+        <th class="px-2 py-3 border-b border-slate-700" colspan="2">ម៉ោង</th>
+        {% for key, label in headings[10:] %}
+        <th class="px-2 py-3" rowspan="2"><a href="{{ sort_links[key] }}" class="text-green-400 text-decoration-none">{{ label }} {% if sort_by == key %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}</a></th>
+        {% endfor %}
+        <th class="px-2 py-3" rowspan="2">កំណត់សម្គាល់</th>
+        <th class="px-2 py-3" rowspan="2">ផ្សេងៗ</th>
+      </tr>
+      <tr>
+        <th class="px-2 py-2 border-t border-slate-700 text-slate-300">ចូល</th>
+        <th class="px-2 py-2 border-t border-slate-700 text-slate-300">ចេញ</th>
+        <th class="px-2 py-2 border-t border-slate-700 text-slate-300">ចូល</th>
+        <th class="px-2 py-2 border-t border-slate-700 text-slate-300">ចេញ</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-800 text-center">
+      {% for r in records %}
+      {% set document_type = r.doc_type|string|lower|trim %}
+      <tr class="hover:bg-slate-800/50 align-top">
+        <td class="px-2 py-2.5">{{ r.seq_no or r.id }}</td>
+        <td class="px-2 py-2.5">{{ r.doc_number or '-' }}</td>
+        <td class="px-2 py-2.5 whitespace-nowrap">{{ r.doc_date.strftime('%d-%m-%Y') if r.doc_date else '-' }}</td>
+        <td class="px-2 py-2.5 text-left max-w-xs" title="{{ r.subject or '-' }}"><span class="report-subject">{{ r.subject or '-' }}</span></td>
+        <td class="px-2 py-2.5 text-left">{{ r.unit or '-' }}</td>
+        <td class="px-2 py-2.5">{{ r.quantity if r.quantity is not none else '-' }}</td>
+        <td class="px-2 py-2.5">{{ r.priority or '-' }}</td>
+        <td class="px-2 py-2.5">{{ 'ចូល' if document_type in ('in', 'ចូល') else ('ចេញ' if document_type in ('out', 'ចេញ') else '-') }}</td>
+        {% set shown_date = r.action_date or r.doc_date %}
+        {% set shown_time = r.action_time or (r.created_at.time() if r.created_at else none) %}
+        <td class="px-2 py-2.5 whitespace-nowrap">{% if shown_date and document_type not in ('out', 'ចេញ') %}{{ shown_date.strftime('%d-%m-%Y') }}{% else %}-{% endif %}</td>
+        <td class="px-2 py-2.5 whitespace-nowrap">{% if shown_date and document_type in ('out', 'ចេញ') %}{{ shown_date.strftime('%d-%m-%Y') }}{% else %}-{% endif %}</td>
+        <td class="px-2 py-2.5 whitespace-nowrap">{% if shown_time and document_type not in ('out', 'ចេញ') %}{{ shown_time.strftime('%H:%M') }}{% else %}-{% endif %}</td>
+        <td class="px-2 py-2.5 whitespace-nowrap">{% if shown_time and document_type in ('out', 'ចេញ') %}{{ shown_time.strftime('%H:%M') }}{% else %}-{% endif %}</td>
+        <td class="px-2 py-2.5">{{ r.status or '-' }}</td>
+        <td class="px-2 py-2.5">{{ r.creator.username if r.creator else '-' }}</td>
+        <td class="px-2 py-2.5 text-left min-w-40">{{ r.remarks or '-' }}</td>
+        <td class="px-2 py-2.5 text-left min-w-40">{{ r.others or '-' }}</td>
+        <td class="px-2 py-2.5 whitespace-nowrap"><a class="audit-button" href="{{ url_for('admin.document_audit', record_id=r.id) }}" target="_self" onclick="window.location.replace(this.href); return false;"><i class="fas fa-clock-rotate-left"></i> ប្រវត្តិ</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="17" class="px-3 py-8 text-center text-slate-400">មិនមានទិន្នន័យត្រូវនឹងលក្ខខណ្ឌស្វែងរក</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/80 p-4 items-center justify-center">
+  <div class="audit-dialog w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl p-5">
+    <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4"><h2 class="text-base font-bold">ប្រវត្តិកែប្រែឯកសារ</h2><button type="button" onclick="closeAudit()" class="text-2xl leading-none text-slate-400 hover:text-white">&times;</button></div>
+    <div id="auditBody"></div>
+  </div>
+</div>
+
+<script>
+const DOCUMENT_AUDITS = {{ document_audits | tojson }};
+const AUDIT_FIELDS = {doc_number:'លេខលិខិត',doc_date:'កាលបរិច្ឆេទលិខិត',subject:'កម្មវត្ថុ',unit:'អង្គភាព',quantity:'ចំនួន',priority:'អាទិភាព',doc_type:'ប្រភេទ',action_date:'កាលបរិច្ឆេទ',action_time:'ម៉ោង',status:'ស្ថានភាព',remarks:'កំណត់សម្គាល់',others:'ផ្សេងៗ'};
+function auditValue(value) { return value === null || value === undefined || value === '' ? '-' : String(value); }
+function renderAuditVersion(title, snapshot, changedFrom) {
+  if (!snapshot) return '';
+  const rows = Object.keys(AUDIT_FIELDS).map(key => { const value = auditValue(snapshot[key]); const previous = changedFrom ? auditValue(changedFrom[key]) : null; const changed = changedFrom && value !== previous; return `<div class="audit-field ${changed ? 'audit-changed' : ''}"><span>${AUDIT_FIELDS[key]}</span><strong>${value}</strong>${changed ? `<em>ពី: ${previous}</em>` : ''}</div>`; }).join('');
+  return `<section class="audit-version"><h3>${title}</h3><div class="audit-grid">${rows}</div></section>`;
+}
+function openAudit(id) {
+  const entries = DOCUMENT_AUDITS[String(id)] || []; const body = document.getElementById('auditBody'); let html = '';
+  let editNumber = 0;
+  entries.forEach(entry => { const title = entry.action === 'create' ? 'ឯកសារដើម' : `កែប្រែលើកទី ${++editNumber}`; html += `<div class="audit-entry"><div class="audit-meta">${title} <span>${entry.user} · ${entry.created_at}</span></div>`; html += renderAuditVersion('ទិន្នន័យបន្ទាប់', entry.after, entry.before); html += '</div>'; });
+  body.innerHTML = html || '<p class="text-slate-400">មិនមានទិន្នន័យប្រវត្តិ។</p>'; const modal = document.getElementById('auditModal'); modal.classList.remove('hidden'); modal.classList.add('flex');
+}
+function closeAudit() { const modal = document.getElementById('auditModal'); modal.classList.add('hidden'); modal.classList.remove('flex'); }
+</script>
+{% endblock %}

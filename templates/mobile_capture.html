@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ថតឯកសារ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<style>
+body{font-family:'Noto Sans Khmer','Segoe UI',sans-serif;}
+.size-btn.active{background-color:#2563eb;color:#fff;border-color:#2563eb;}
+#cropImage{max-width:100%;display:block;}
+
+.cropper-point {
+  width: 22px !important;
+  height: 22px !important;
+  background-color: #2563eb !important;
+  border: 2px solid #fff !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.45) !important;
+}
+.cropper-point.point-n  { top: -11px !important;    left: 50% !important; margin-left: -11px !important; }
+.cropper-point.point-s  { bottom: -11px !important; left: 50% !important; margin-left: -11px !important; }
+.cropper-point.point-e  { right: -11px !important;  top: 50% !important;  margin-top: -11px !important; }
+.cropper-point.point-w  { left: -11px !important;   top: 50% !important;  margin-top: -11px !important; }
+.cropper-point.point-ne { top: -11px !important;    right: -11px !important; }
+.cropper-point.point-nw { top: -11px !important;    left: -11px !important; }
+.cropper-point.point-se { bottom: -11px !important; right: -11px !important; }
+.cropper-point.point-sw { bottom: -11px !important; left: -11px !important; }
+
+.cropper-point.point-ne, .cropper-point.point-nw,
+.cropper-point.point-se, .cropper-point.point-sw {
+  width: 26px !important;
+  height: 26px !important;
+}
+.cropper-point.point-ne { top: -13px !important; right: -13px !important; }
+.cropper-point.point-nw { top: -13px !important; left: -13px !important; }
+.cropper-point.point-se { bottom: -13px !important; right: -13px !important; }
+.cropper-point.point-sw { bottom: -13px !important; left: -13px !important; }
+
+.cropper-line { background-color: #2563eb !important; opacity: .6 !important; }
+.cropper-view-box { outline: 2px solid #2563eb !important; }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4">
+  <div class="max-w-md mx-auto bg-white rounded-lg shadow p-5">
+    <h1 class="text-lg font-bold mb-1">📷 ថត ឬជ្រើសរើសឯកសារ</h1>
+    <p class="text-sm text-slate-500 mb-4">ថតរូប ឬជ្រើសរើសរូបភាពពីក្នុងទូរស័ព្ទ ដើម្បីបញ្ជូនទៅកុំព្យូទ័រភ្លាមៗ។</p>
+
+    {% if not valid %}
+      <div class="bg-red-100 text-red-700 text-sm p-3 rounded">
+        តំណនេះផុតកំណត់ហើយ។ សូមចុច "ស្កេនតាមទូរស័ព្ទ" នៅកុំព្យូទ័រម្តងទៀត ដើម្បីទទួល QR/តំណថ្មី។
+      </div>
+    {% else %}
+      <!-- 🛠️ កែសម្រួលត្រង់នេះ៖ ដក capture="environment" ចออก ដើម្បីឱ្យទូរស័ព្ទបង្ហាញជម្រើសរវាង Camera និង Photo Library (Gallery) -->
+      <input type="file" id="cameraInput" accept="image/*" class="hidden">
+      
+      <button id="btnOpenCamera" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-medium mb-3">
+        📁 ជ្រើសរើសរូបភាព ឬ ថតរូប
+      </button>
+
+      <!-- Crop step -->
+      <div id="cropBox" class="hidden mb-3">
+        <p class="text-xs text-slate-500 mb-2">ជ្រើសរើសទំហំកាត់រូបភាព៖</p>
+        <div class="flex gap-2 mb-3">
+          <button type="button" class="size-btn flex-1 border rounded py-2 text-sm" data-ratio="0.6667" data-label="2x3">2×3</button>
+          <button type="button" class="size-btn flex-1 border rounded py-2 text-sm" data-ratio="0.6667" data-label="4x6">4×6</button>
+          <button type="button" class="size-btn flex-1 border rounded py-2 text-sm active" data-ratio="full" data-label="full">ពេញ (Full)</button>
+        </div>
+        <div class="border rounded overflow-hidden bg-slate-50" style="max-height:50vh;">
+          <img id="cropImage" src="">
+        </div>
+        <button id="btnConfirmCrop" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-medium mt-3">
+          ✂️ កាត់ និងបន្ត
+        </button>
+      </div>
+
+      <img id="previewImg" class="hidden w-full rounded border mb-3">
+
+      <button id="btnRetake" class="hidden w-full border py-2 rounded text-sm mb-3">🔄 ជ្រើសរើសម្តងទៀត</button>
+
+      <button id="btnUpload" class="hidden w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded font-medium mb-3">
+        ⬆️ ផ្ញើទៅកុំព្យូទ័រ
+      </button>
+
+      <div id="statusBox" class="hidden text-sm p-3 rounded"></div>
+    {% endif %}
+  </div>
+
+  <!-- Loading Overlay Animation ពេលកំពុងផ្ញើរូបភាពទៅកុំព្យូទ័រ -->
+  <div id="mobileLoadingOverlay" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
+    <div class="animate-spin rounded-full h-14 w-14 border-4 border-solid border-green-500 border-t-transparent mb-4"></div>
+    <p class="text-white text-base font-medium text-center">កំពុងផ្ញើ និងកែសម្រួលអត្ថបទទៅកុំព្យូទ័រ...</p>
+    <p class="text-slate-300 text-xs mt-1">សូមរង់ចាំបន្តិច</p>
+  </div>
+
+<script>
+var code = {{ code|tojson }};
+var input = document.getElementById("cameraInput");
+var btnOpen = document.getElementById("btnOpenCamera");
+var btnUpload = document.getElementById("btnUpload");
+var btnRetake = document.getElementById("btnRetake");
+var btnConfirmCrop = document.getElementById("btnConfirmCrop");
+var preview = document.getElementById("previewImg");
+var statusBox = document.getElementById("statusBox");
+var cropBox = document.getElementById("cropBox");
+var cropImage = document.getElementById("cropImage");
+var sizeButtons = document.querySelectorAll(".size-btn");
+var mobileLoadingOverlay = document.getElementById("mobileLoadingOverlay");
+
+var selectedFile = null;  
+var cropper = null;
+var currentRatio = "full"; 
+
+function resetToCapture() {
+  cropBox.classList.add("hidden");
+  preview.classList.add("hidden");
+  preview.src = "";
+  btnUpload.classList.add("hidden");
+  btnRetake.classList.add("hidden");
+  statusBox.classList.add("hidden");
+  statusBox.textContent = "";
+  if (cropper) { cropper.destroy(); cropper = null; }
+  selectedFile = null;
+  input.value = "";
+}
+
+function showPreview(blobOrFile) {
+  selectedFile = blobOrFile;
+  preview.src = URL.createObjectURL(blobOrFile);
+  preview.classList.remove("hidden");
+  btnUpload.classList.remove("hidden");
+  btnRetake.classList.remove("hidden");
+  cropBox.classList.add("hidden");
+  statusBox.classList.add("hidden");
+  if (cropper) { cropper.destroy(); cropper = null; }
+}
+
+function applyRatio(ratioStr) {
+  currentRatio = ratioStr;
+  sizeButtons.forEach(function (b) { b.classList.toggle("active", b.dataset.ratio === ratioStr || (ratioStr !== "full" && b.dataset.ratio === ratioStr)); });
+  if (!cropper) return;
+  if (ratioStr === "full") {
+    cropper.setAspectRatio(NaN);
+  } else {
+    cropper.setAspectRatio(parseFloat(ratioStr));
+  }
+}
+
+sizeButtons.forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    sizeButtons.forEach(function (b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+    applyRatio(btn.dataset.ratio);
+  });
+});
+
+if (btnOpen) {
+  btnOpen.addEventListener("click", function () {
+    resetToCapture();
+    input.click();
+  });
+
+  input.addEventListener("change", function () {
+    if (!input.files || !input.files[0]) return;
+    var rawFile = input.files[0];
+
+    cropImage.src = URL.createObjectURL(rawFile);
+    cropBox.classList.remove("hidden");
+    preview.classList.add("hidden");
+    btnUpload.classList.add("hidden");
+    btnRetake.classList.add("hidden");
+    statusBox.classList.add("hidden");
+
+    cropImage.onload = function () {
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(cropImage, {
+        viewMode: 1,
+        autoCropArea: 1,
+        background: false,
+        aspectRatio: (currentRatio === "full") ? NaN : parseFloat(currentRatio),
+      });
+    };
+    sizeButtons.forEach(function (b) { b.classList.remove("active"); });
+    document.querySelector('.size-btn[data-ratio="full"]').classList.add("active");
+    currentRatio = "full";
+    input.value = ""; 
+  });
+
+  btnConfirmCrop.addEventListener("click", function () {
+    if (!cropper) return;
+    cropper.getCroppedCanvas({ imageSmoothingQuality: "high" }).toBlob(function (blob) {
+      showPreview(blob);
+    }, "image/jpeg", 0.92);
+  });
+
+  btnRetake.addEventListener("click", function () {
+    resetToCapture();
+    input.click(); 
+  });
+
+  btnUpload.addEventListener("click", function () {
+    if (!selectedFile) return;
+    
+    if (mobileLoadingOverlay) mobileLoadingOverlay.classList.remove("hidden");
+    btnUpload.disabled = true;
+
+    var formData = new FormData();
+    formData.append("image", selectedFile, "capture.jpg");
+
+    fetch("/api/ocr/upload/" + code, { method: "POST", body: formData })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (mobileLoadingOverlay) mobileLoadingOverlay.classList.add("hidden");
+        btnUpload.disabled = false;
+        
+        statusBox.classList.remove("hidden");
+        if (data.success) {
+          if (data.warning) {
+            statusBox.className = "text-sm p-3 rounded bg-amber-100 text-amber-800";
+            statusBox.textContent = "⚠️ បានផ្ញើទៅកុំព្យូទ័រ ប៉ុន្តែគុណភាព OCR ប្រហែលជាមិនល្អ (" + data.warning + ")";
+          } else {
+            statusBox.className = "text-sm p-3 rounded bg-green-100 text-green-700";
+            statusBox.textContent = "✅ បានផ្ញើទៅកុំព្យូទ័រដោយជោគជ័យ! អ្នកអាចថតបន្តទៀត ឬបិទទំព័រនេះ។";
+          }
+        } else {
+          statusBox.className = "text-sm p-3 rounded bg-red-100 text-red-700";
+          statusBox.textContent = "❌ បរាជ័យ: " + (data.error || "unknown error");
+        }
+      })
+      .catch(function () {
+        if (mobileLoadingOverlay) mobileLoadingOverlay.classList.add("hidden");
+        btnUpload.disabled = false;
+        statusBox.classList.remove("hidden");
+        statusBox.className = "text-sm p-3 rounded bg-red-100 text-red-700";
+        statusBox.textContent = "❌ មានបញ្ហាក្នុងការភ្ជាប់បណ្តាញ។";
+      });
+  });
+}
+</script>
+</body>
+</html>

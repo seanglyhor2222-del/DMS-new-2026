@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}នាំចូល Excel{% endblock %}
+{% block content %}
+
+<div class="bg-white rounded-lg shadow p-6 max-w-2xl mx-auto">
+  <h1 class="text-lg font-bold mb-1">⬆️ នាំចូលកំណត់ត្រាពី Excel</h1>
+  <p class="text-sm text-slate-500 mb-4">
+    ទាញយកទម្រង់គំរូខាងក្រោមសិន បំពេញទិន្នន័យ រួចផ្ទុកឡើងវិញ។ ជួរដែលមានលេខលិខិតស្ទួននឹងត្រូវរំលងដោយស្វ័យប្រវត្តិ។
+  </p>
+
+  <a href="{{ url_for('documents.import_template_xlsx') }}"
+     class="inline-block mb-5 border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded text-sm font-medium">
+    📄 ទាញយកទម្រង់គំរូ (.xlsx)
+  </a>
+
+  <form method="POST" enctype="multipart/form-data" class="border-t pt-4">
+    <label class="block text-xs font-medium text-slate-500 mb-1">ជ្រើសរើសឯកសារ Excel (.xlsx)</label>
+    <input type="file" name="xlsx_file" accept=".xlsx" required class="w-full border rounded px-3 py-2 text-sm bg-white mb-4">
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded text-sm font-medium">
+      ⬆️ ផ្ទុកឡើង និងនាំចូល
+    </button>
+    <a href="{{ url_for('documents.dashboard') }}" class="ml-2 text-sm text-slate-500 hover:underline">បោះបង់</a>
+  </form>
+
+  {% if skipped %}
+  <div class="mt-6 bg-red-50 border border-red-200 rounded p-4">
+    <p class="text-sm font-medium text-red-700 mb-2">ជួរដែលបានរំលង ({{ skipped|length }}) ៖</p>
+    <ul class="text-xs text-red-600 list-disc list-inside space-y-1">
+      {% for s in skipped %}<li>{{ s }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

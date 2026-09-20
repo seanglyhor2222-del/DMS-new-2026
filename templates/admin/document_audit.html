@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}ប្រវត្តិឯកសារ{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-lg font-bold">ប្រវត្តិកែប្រែឯកសារ</h1>
+    <p class="text-xs text-slate-500 mt-1">លេខកំណត់ត្រា #{{ record_id }}</p>
+  </div>
+  <a href="{{ url_for('admin.reports') }}" class="audit-button text-decoration-none"><i class="fas fa-arrow-left"></i> សវនកម្ម</a>
+</div>
+
+{% if versions %}
+<div class="audit-timeline">
+  {% for version in versions %}
+  {% set snapshot = version.after or version.before %}
+  {% set previous = version.before if version.action == 'edit' else none %}
+  <section class="audit-entry audit-version-card">
+    <div class="audit-meta">
+      {% if version.action == 'create' %}ឯកសារដើម{% elif version.action == 'edit' %}កែប្រែលើកទី {{ loop.index0 }}{% else %}បានលុបឯកសារ{% endif %}
+      <span>{{ version.full_name }} ({{ version.username }}) · តួនាទី: {{ 'User' if version.role == 'writer' else version.role }} · {{ version.created_at }}</span>
+    </div>
+    {% if version.action == 'delete' %}<p class="audit-delete-label">ទិន្នន័យនេះត្រូវបានលុបដោយអ្នកប្រើខាងលើ។</p>{% endif %}
+    <div class="audit-grid">
+      {% for key, label in [('doc_number','លេខលិខិត'),('doc_date','កាលបរិច្ឆេទលិខិត'),('subject','កម្មវត្ថុ'),('unit','អង្គភាព'),('quantity','ចំនួន'),('priority','អាទិភាព'),('doc_type','ប្រភេទ'),('action_date','កាលបរិច្ឆេទ'),('action_time','ម៉ោង'),('status','ស្ថានភាព'),('remarks','កំណត់សម្គាល់'),('others','ផ្សេងៗ')] %}
+      {% set value = snapshot[key] if snapshot else none %}
+      {% set old_value = previous[key] if previous else none %}
+      {% set changed = previous is not none and (value|string) != (old_value|string) %}
+      <div class="audit-field {% if changed %}audit-changed{% endif %}">
+        <span>{{ label }}</span>
+        <strong>{{ value if value is not none and value != '' else '-' }}</strong>
+        {% if changed %}<em>ពីមុន: {{ old_value if old_value is not none and old_value != '' else '-' }}</em>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% else %}
+<div class="audit-dialog rounded-xl p-6 text-slate-400">មិនមានប្រវត្តិ snapshot សម្រាប់ឯកសារនេះទេ។ ប្រវត្តិពេញលេញនឹងចាប់ផ្តើមរក្សាទុកចាប់ពីការកែប្រែថ្មី។</div>
+{% endif %}
+{% endblock %}

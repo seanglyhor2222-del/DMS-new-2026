@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}ការកំណត់ប្រព័ន្ធ{% endblock %}
+{% block content %}
+
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-6">
+  <h1 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100">⚙️ ការកំណត់ទូទៅ</h1>
+  <form method="POST" action="{{ url_for('admin.update_settings') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1">របៀបផ្តល់លេខលិខិត (លេខលិខិត)</label>
+      <select name="doc_number_mode" required class="w-full border dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded px-3 py-2 text-sm">
+        <option value="auto" {% if settings.doc_number_mode=='auto' %}selected{% endif %}>ស្វ័យប្រវត្តិ (Auto)</option>
+        <option value="manual" {% if settings.doc_number_mode=='manual' %}selected{% endif %}>អ្នកប្រើបញ្ចូលដោយខ្លួនឯង</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1">លេខបន្ទាប់ (Auto counter)</label>
+      <input type="number" name="doc_number_next" value="{{ settings.doc_number_next }}" required min="1" class="w-full border dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded px-3 py-2 text-sm">
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input type="checkbox" name="freeze_table_header" {% if settings.freeze_table_header %}checked{% endif %}>
+      បិទ/បើក ការដាក់ចំណងជើងតារាងជិតផ្នែកខាងលើ (Freeze table header)
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input type="checkbox" name="doc_type_free_text" {% if settings.doc_type_free_text %}checked{% endif %}>
+      អនុញ្ញាតឲ្យអ្នកប្រើវាយ ប្រភេទឯកសារ ដោយខ្លួនឯង (បន្ថែមលើ Dropdown)
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input type="checkbox" name="unit_free_text" {% if settings.unit_free_text %}checked{% endif %}>
+      អនុញ្ញាតឲ្យអ្នកប្រើវាយ អង្គភាព ដោយខ្លួនឯង (បន្ថែមលើ Dropdown)
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input type="checkbox" name="priority_free_text" {% if settings.priority_free_text %}checked{% endif %}>
+      អនុញ្ញាតឲ្យអ្នកប្រើវាយ អាទិភាព ដោយខ្លួនឯង
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input type="checkbox" name="status_free_text" {% if settings.status_free_text %}checked{% endif %}>
+      អនុញ្ញាតឲ្យអ្នកប្រើវាយ ស្ថានភាព ដោយខ្លួនឯង
+    </label>
+
+
+    <div class="md:col-span-2 border-t border-slate-200 dark:border-slate-700 pt-4">
+    <h2 class="font-bold text-(12px) text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
+      <i class="fas fa-palette text-green-400"></i>
+      <span>ពណ៌ប្រព័ន្ធ</span>
+    </h2>
+      <div class="grid grid-cols-1 gap-3">
+        {% for key, label in [('page_background_color', 'ពណ៌ផ្ទៃទំព័រ'), ('panel_background_color', 'ពណ៌ផ្ទៃប្រអប់'), ('table_header_color', 'ពណ៌ក្បាលតារាង'), ('table_row_color', 'ពណ៌ជួរតារាង')] %}
+        <label class="flex items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <span>{{ label }}</span>
+          <input type="color" name="{{ key }}" value="{{ settings[key] }}" required class="color-picker" aria-label="{{ label }}">
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="md:col-span-2">
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded text-sm font-medium">រក្សាទុកការកំណត់</button>
+    </div>
+  </form>
+</div>
+
+<!-- បន្ថែមប្រភេទឯកសារ (doc_type) ចូលក្នុងបញ្ជីគ្រប់គ្រង Lookup ជាមួយ អង្គភាព អាទិភាព និងស្ថានភាព -->
+{% for category, label in [('doc_type', 'ប្រភេទឯកសារ'), ('unit', 'អង្គភាព'), ('priority', 'អាទិភាពលិខិត'), ('status', 'ស្ថានភាព')] %}
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-6">
+  <h2 class="font-bold mb-3 text-slate-800 dark:text-slate-100">📋 បញ្ជី{{ label }}</h2>
+  <form method="POST" action="{{ url_for('admin.add_lookup') }}" class="flex gap-2 mb-4">
+    <input type="hidden" name="category" value="{{ category }}">
+    <input type="text" name="value_km" placeholder="បន្ថែមតម្លៃថ្មី..." required class="flex-1 border dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded px-3 py-2 text-sm">
+    <button type="submit" class="bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 text-white px-4 py-2 rounded text-sm">បន្ថែម</button>
+  </form>
+  <table class="min-w-full text-sm">
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+      {% for item in items[category] %}
+      <tr>
+        <td class="py-2 text-slate-800 dark:text-slate-200">{{ item.value_km }}</td>
+        <td class="py-2 text-right">
+          <div class="inline-flex items-center justify-end gap-3">
+            <!-- Modern Toggle Switch Form -->
+            <form method="POST" action="{{ url_for('admin.toggle_lookup', item_id=item.id) }}" class="inline-flex items-center m-0">
+              <span class="text-xs mr-2 {% if item.is_active %}text-green-600 dark:text-green-400 font-semibold{% else %}text-slate-400{% endif %}">
+                {{ 'បើក' if item.is_active else 'បិទ' }}
+              </span>
+              <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none {% if item.is_active %}bg-sky-500{% else %}bg-slate-300 dark:bg-slate-600{% endif %}" title="ប្តូរស្ថានភាព">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-slate-900 transition-transform {% if item.is_active %}translate-x-6{% else %}translate-x-1{% endif %}"></span>
+              </button>
+            </form>
+            
+            <!-- Delete Button -->
+            <form method="POST" action="{{ url_for('admin.delete_lookup', item_id=item.id) }}" class="inline m-0" onsubmit="return confirm('លុប?');">
+              <button type="submit" class="lookup-delete-button ml-2" title="លុប" aria-label="លុប">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td class="py-3 text-slate-400 text-center" colspan="2">មិនទាន់មានទិន្នន័យ</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+{% endblock %}

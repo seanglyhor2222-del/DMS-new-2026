@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}គ្រប់គ្រងអ្នកប្រើប្រាស់{% endblock %}
+{% block content %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+  <h1 class="text-lg font-bold mb-4">➕ បង្កើតគណនីថ្មី</h1>
+  <form method="POST" action="{{ url_for('admin.create_user') }}" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">ឈ្មោះអ្នកប្រើ(Username)</label>
+      <input type="text" name="username" required class="w-full border rounded px-3 py-2 text-sm">
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">ឈ្មោះពេញ(Display Name)</label>
+      <input type="text" name="full_name" class="w-full border rounded px-3 py-2 text-sm">
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">ពាក្យសម្ងាត់(Password)</label>
+      <input type="text" name="password" required class="w-full border rounded px-3 py-2 text-sm">
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">តួនាទី</label>
+      <select name="role" class="w-full border rounded px-3 py-1 text-sm">
+        <option value="writer">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">បង្កើត</button>
+  </form>
+</div>
+
+<form method="POST" action="{{ url_for('admin.bulk_update_users') }}">
+<div class="admin-users-table bg-white rounded-lg shadow overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+      <tr>
+        <th class="px-3 py-2 text-left">ឈ្មោះអ្នកប្រើ</th>
+        <th class="px-3 py-2 text-left">ឈ្មោះពេញ</th>
+        <th class="px-3 py-2 text-left">ស្ថានភាព</th>
+        <th class="px-3 py-2 text-left">តួនាទី</th>
+        <th class="px-3 py-2 text-left">សកម្ម</th>
+        <th class="px-3 py-2 text-left">ស្កេនអត្ថបទ</th>
+        <th class="px-3 py-2 text-left">ស្វែងរក</th>
+        <th class="px-3 py-2 text-left">បញ្ចូលថ្មី</th>
+        <th class="px-3 py-2 text-left">កែប្រែ</th>
+        <th class="px-3 py-2 text-left">ពាក្យសម្ងាត់ថ្មី</th>
+        <th class="px-3 py-2 text-left">សកម្មភាព</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y">
+      {% for u in users %}
+      <tr>
+        <td class="px-3 py-2 font-medium">
+          <input type="text" name="username_{{ u.id }}" value="{{ u.username }}" required class="border rounded text-xs px-2 py-1 w-28">
+          <input type="hidden" name="user_ids" value="{{ u.id }}">
+        </td>
+        <td class="px-3 py-2"><input type="text" name="full_name_{{ u.id }}" value="{{ u.full_name }}" class="border rounded text-xs px-2 py-1 w-36"></td>
+        <td class="px-3 py-2 whitespace-nowrap">
+          {% if u.last_seen_at and u.last_seen_at >= online_cutoff %}
+          <span class="user-presence user-presence-online"><span aria-hidden="true"></span>Online</span>
+          {% else %}
+          <span class="user-presence user-presence-offline"><span aria-hidden="true"></span>Offline</span>
+          {% endif %}
+        </td>
+        <td class="px-3 py-2">
+          <select name="role_{{ u.id }}" class="border rounded text-xs px-1 py-1">
+            <option value="writer" {% if u.role=='writer' %}selected{% endif %}>User</option>
+            <option value="admin" {% if u.role=='admin' %}selected{% endif %}>Admin</option>
+          </select>
+        </td>
+        <td class="px-3 py-2"><input type="checkbox" name="is_active_account_{{ u.id }}" {% if u.is_active_account %}checked{% endif %}></td>
+        <td class="px-3 py-2"><input type="checkbox" name="can_scan_ocr_{{ u.id }}" {% if u.can_scan_ocr %}checked{% endif %}></td>
+        <td class="px-3 py-2"><input type="checkbox" name="can_search_{{ u.id }}" {% if u.can_search %}checked{% endif %}></td>
+        <td class="px-3 py-2"><input type="checkbox" name="can_add_{{ u.id }}" {% if u.can_add %}checked{% endif %}></td>
+        <td class="px-3 py-2"><input type="checkbox" name="can_edit_{{ u.id }}" {% if u.can_edit %}checked{% endif %}></td>
+        <td class="px-3 py-2"><input type="text" name="new_password_{{ u.id }}" placeholder="(មិនប្តូរ)" class="border rounded text-xs px-2 py-1 w-28"></td>
+        <td class="px-3 py-2 whitespace-nowrap">
+          <a href="{{ url_for('admin.user_history', user_id=u.id) }}" class="text-slate-600 hover:underline text-xs">ប្រវត្តិ</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="mt-4">
+  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded text-sm font-medium">💾 រក្សាទុកទាំងអស់</button>
+</div>
+</form>
+
+<p class="text-xs text-slate-400 mt-3">*Admin មានសិទ្ធិគ្រប់យ៉ាងជានិច្ច ដោយមិនគិតពីប្រអប់ធីកខាងលើទេ។ ប្រអប់ធីកអនុវត្តចំពោះ User តែប៉ុណ្ណោះ។</p>
+{% endblock %}

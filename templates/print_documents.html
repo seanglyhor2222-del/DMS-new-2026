@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>លិខិត ចេញ/ចូល — PDF</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Noto Sans Khmer','Segoe UI',sans-serif; margin: 24px; color: #1e293b; }
+  {% for f in site_fonts %}
+  @font-face { font-family: '{{ f.family_name }}'; src: url('{{ url_for('static', filename='fonts/' + f.stored_filename) }}'); }
+  {% endfor %}
+  {% if default_font %}
+  body { font-family: '{{ default_font.family_name }}', 'Noto Sans Khmer', sans-serif; }
+  {% endif %}
+
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .meta { font-size: 11px; color: #64748b; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; word-wrap: break-word; overflow: hidden; }
+  th { background: #1e293b; color: #fff; text-align: center; }
+  tr:nth-child(even) { background: #f8fafc; }
+  
+  /* កំណត់ទម្រង់ជួរឈរកម្មវត្ថុឱ្យដូចតារាង Dashboard */
+  .subject-cell {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toolbar { margin-bottom: 16px; }
+  .toolbar button {
+    background: #2563eb; color: #fff; border: none; padding: 8px 16px;
+    border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  @media print {
+    .toolbar { display: none; }
+    body { margin: 8px; }
+    @page { size: A4 landscape; margin: 10mm; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="window.print()">🖨️ បោះពុម្ព / រក្សាទុកជា PDF</button>
+  </div>
+
+  <h1>តារាងលិខិត ចេញ/ចូល</h1>
+  <p class="meta">
+    បង្កើតនៅ {{ generated_at.strftime('%d-%m-%Y %H:%M') }} &middot; សរុប {{ records|length }} កំណត់ត្រា
+    {% if filters.q %} &middot; ស្វែងរក៖ "{{ filters.q }}"{% endif %}
+    {% if filters.date_from or filters.date_to %} &middot; ចន្លោះកាលបរិច្ឆេទ៖ {{ filters.date_from or '...' }} — {{ filters.date_to or '...' }}{% endif %}
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 40px;">ល.រ</th>
+        <th style="width: 60px;">ចេញ/ចូល</th>
+        <th style="width: 90px;">លេខលិខិត</th>
+        <th style="width: 90px;">កាលបរិច្ឆេទលិខិត</th>
+        <th>កម្មវត្ថុ</th>
+        <th style="width: 120px;">អង្គភាព</th>
+        <th style="width: 50px;">ចំនួន</th>
+        <th style="width: 70px;">អាទិភាព</th>
+        <th style="width: 90px;">កាលបរិច្ឆេទ ចូល/ចេញ</th>
+        <th style="width: 60px;">ម៉ោង</th>
+        <th style="width: 80px;">ស្ថានភាព</th>
+        <th style="width: 100px;">កំណត់សម្គាល់</th>
+        <th style="width: 100px;">ផ្សេងៗ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td style="text-align: center;">{{ r.seq_no }}</td>
+        <td style="text-align: center;">{{ r.doc_type or '-' }}</td>
+        <td style="text-align: center;">{{ r.doc_number or '-' }}</td>
+        <td style="text-align: center;">{{ r.doc_date.strftime('%d-%m-%Y') if r.doc_date else '-' }}</td>
+        <td class="subject-cell" title="{{ r.subject }}">{{ r.subject or '-' }}</td>
+        <td>{{ r.unit or '-' }}</td>
+        <td style="text-align: center;">{{ r.quantity if r.quantity is not none else '-' }}</td>
+        <td style="text-align: center;">{{ r.priority or '-' }}</td>
+        <td style="text-align: center;">{{ r.action_date.strftime('%d-%m-%Y') if r.action_date else '-' }}</td>
+        <td style="text-align: center;">{{ r.action_time.strftime('%H:%M') if r.action_time else '-' }}</td>
+        <td style="text-align: center;">{{ r.status or '-' }}</td>
+        <td>{{ r.remarks or '-' }}</td>
+        <td>{{ r.others or '-' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="13" style="text-align:center;color:#94a3b8;padding: 20px;">មិនមានទិន្នន័យ</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () { window.print(); }, 400);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{# Expects: field_name, current_value, options (LookupItem list), free_text (bool) #}
+
+{% if free_text %}
+<input type="text" name="{{ field_name }}" id="{{ field_name }}_input"
+       value="{{ current_value or '' }}" list="{{ field_name }}_options"
+  class="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-sm text-white focus:border-green-400 focus:outline-none focus:ring-1 focus:ring-green-400">
+<datalist id="{{ field_name }}_options">
+  {% for opt in options %}
+  <option value="{{ opt.value_km }}">{{ opt.value_km }}</option>
+  {% endfor %}
+</datalist>
+{% else %}
+<select name="{{ field_name }}" class="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-sm text-white focus:border-green-400 focus:outline-none focus:ring-1 focus:ring-green-400">
+  <option value="">-- ជ្រើសរើស --</option>
+  {% for opt in options %}
+  <option value="{{ opt.value_km }}" {% if current_value == opt.value_km %}selected{% endif %}>{{ opt.value_km }}</option>
+  {% endfor %}
+</select>
+{% endif %}

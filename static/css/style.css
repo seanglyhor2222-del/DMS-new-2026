@@ -1,0 +1,306 @@
+table { border-collapse: collapse; }
+input[type="checkbox"] { width: 16px; height: 16px; }
+
+body:has(.document-table-scroll) { overflow: hidden; }
+
+.dashboard-controls-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 5px; width: 42px; height: 26px; margin-left: 4px; border: 1px solid rgba(248, 113, 113, .65); border-radius: 6px; color: #fecaca; background: rgba(127, 29, 29, .72); cursor: pointer; font-size: 11px; line-height: 1; vertical-align: middle; transition: color .2s, background .2s, border-color .2s; }
+.dashboard-controls-toggle:hover { border-color: #f87171; color: #fff; background: #dc2626; }
+.dashboard-controls-toggle:focus-visible { outline: 2px solid #fca5a5; outline-offset: 2px; }
+.dashboard-controls-collapsed { display: none; }
+
+.user-presence { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.user-presence > span { width: 8px; height: 8px; border-radius: 50%; }
+.user-presence-online { color: #22c55e; }
+.user-presence-online > span { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, .14); }
+.user-presence-offline { color: #94a3b8; }
+.user-presence-offline > span { background: #64748b; }
+
+.document-detail-modal { background: rgba(9, 13, 22, .96) !important; }
+.document-detail-grid { align-items: stretch; }
+.document-detail-field { min-width: 0; padding: 11px 13px 12px; border: 1px solid rgba(100, 116, 139, .24); border-radius: 9px; background: rgba(30, 41, 59, .42); }
+.document-detail-field-wide { background: rgba(30, 41, 59, .58); }
+.document-detail-label { display: block; margin-bottom: 7px; color: #7dd3a8 !important; font-size: 11px; letter-spacing: .02em; }
+.document-detail-value { display: block; min-height: 20px; color: #f1f5f9 !important; font-size: 14px; line-height: 1.55; }
+.document-detail-value:empty::after { content: '-'; color: #64748b; }
+.document-detail-actions { margin-top: 18px !important; }
+html.dark .document-detail-label { color: #4ade80 !important; }
+html:not(.dark) .document-detail-modal { background: rgba(255, 255, 255, .98) !important; color: #182235 !important; }
+html:not(.dark) .document-detail-field { border-color: rgba(67, 87, 120, .18); background: #f8fafc; }
+html:not(.dark) .document-detail-field-wide { background: #f1f5f9; }
+html:not(.dark) .document-detail-label { color: #15805b !important; }
+html:not(.dark) .document-detail-value { color: #182235 !important; }
+
+.login-page { --login-ink: #e8edf7; --login-muted: #8e9bb5; --login-panel: rgba(17, 25, 43, .82); --login-field: rgba(7, 13, 27, .64); --login-border: rgba(137, 160, 201, .2); --login-accent: #f2b84b; position: relative; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--login-ink); background: #070b14; }
+.login-page::before { content: ''; position: absolute; inset: 0; opacity: .32; background-image: linear-gradient(rgba(134, 158, 196, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(134, 158, 196, .06) 1px, transparent 1px); background-size: 72px 72px; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
+.login-stars, .login-glow { position: absolute; inset: 0; pointer-events: none; }
+.login-star { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff8d9; box-shadow: 0 0 8px 2px rgba(242, 184, 75, .65); animation: login-twinkle ease-in-out infinite; }
+.login-glow { filter: blur(1px); opacity: .5; }
+.login-glow-one { background: radial-gradient(circle at 20% 24%, rgba(46, 105, 190, .2), transparent 24%); }
+.login-glow-two { background: radial-gradient(circle at 84% 78%, rgba(196, 126, 36, .13), transparent 22%); }
+.login-layout { position: relative; z-index: 2; width: min(100% - 32px, 430px); }
+.login-card { padding: 42px 42px 28px; border: 1px solid var(--login-border); border-radius: 18px; background: var(--login-panel); box-shadow: 0 28px 80px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .08); backdrop-filter: blur(18px); animation: login-arrive .7s ease-out both; }
+.login-brand-mark { display: grid; place-items: center; width: 46px; height: 46px; margin: 0 auto 20px; border: 1px solid rgba(242, 184, 75, .5); border-radius: 13px; color: #101621; background: var(--login-accent); box-shadow: 0 8px 25px rgba(242, 184, 75, .2); font-size: 25px; font-weight: 700; }
+.login-kicker { margin: 0 0 9px; color: var(--login-accent); font-family: 'Segoe UI', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2.4px; text-align: center; }
+.login-card h1 { margin: 0; color: var(--login-ink); font-size: 24px; font-weight: 700; text-align: center; }
+.login-subtitle { margin: 8px 0 30px; color: var(--login-muted); font-size: 13px; text-align: center; }
+.login-form label { display: block; margin: 0 0 8px; color: #c7d0e0; font-size: 13px; font-weight: 600; }
+.login-input-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 19px; padding: 0 14px; border: 1px solid var(--login-border); border-radius: 9px; background: var(--login-field); transition: border-color .2s, box-shadow .2s; }
+.login-input-wrap:focus-within { border-color: var(--login-accent); box-shadow: 0 0 0 3px rgba(242, 184, 75, .12); }
+.login-input-wrap > span, .login-input-wrap > i { color: var(--login-accent); font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', sans-serif; font-size: 18px; width: 20px; text-align: center; }
+.login-input-wrap input { width: 100%; min-width: 0; padding: 13px 0; border: 0; outline: 0; color: var(--login-ink); background: transparent; font: inherit; font-size: 13px; }
+.login-input-wrap input::placeholder { color: #66738b; }
+.date-time-field { cursor: pointer; }
+.date-time-field input { cursor: pointer; }
+.login-submit { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 9px; padding: 13px 16px; border: 1px solid #f5c866; border-radius: 9px; color: #161a22; background: var(--login-accent); cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; transition: transform .2s, box-shadow .2s, background .2s; }
+.login-submit:hover { background: #ffd477; box-shadow: 0 10px 24px rgba(242, 184, 75, .2); transform: translateY(-1px); }
+.login-alert { margin-bottom: 18px; padding: 11px 13px; border: 1px solid rgba(248, 113, 113, .35); border-radius: 8px; color: #fecaca; background: rgba(127, 29, 29, .25); font-size: 12px; }
+.login-footer { margin: 26px 0 0; color: #65728a; font-family: 'Segoe UI', sans-serif; font-size: 9px; letter-spacing: 1.8px; text-align: center; }
+.login-footer span { padding: 0 5px; color: var(--login-accent); }
+.login-theme-toggle { position: fixed; z-index: 3; top: 20px; right: 22px; border: 1px solid rgba(255, 255, 255, .1); }
+html:not(.dark) .login-page { --login-ink: #182235; --login-muted: #65728a; --login-panel: rgba(255, 255, 255, .8); --login-field: rgba(244, 247, 252, .8); --login-border: rgba(67, 87, 120, .18); background: #e9eef6; }
+html:not(.dark) .login-page::before { opacity: .22; }
+html:not(.dark) .login-star { background: #60779e; box-shadow: 0 0 7px 2px rgba(82, 112, 163, .4); }
+html:not(.dark) .login-form label { color: #42516a; }
+html:not(.dark) .login-input-wrap input { color: var(--login-ink); }
+html:not(.dark) .login-theme-toggle { color: #26344a; background: rgba(255, 255, 255, .55); }
+@keyframes login-twinkle { 0%, 100% { opacity: .15; transform: scale(.7); } 45% { opacity: 1; transform: scale(1.35); } 70% { opacity: .35; transform: scale(.9); } }
+@keyframes login-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .login-star, .login-card { animation: none; } }
+@media (max-width: 480px) { .login-card { padding: 32px 24px 24px; } .login-theme-toggle { top: 14px; right: 14px; } }
+
+
+/* ============================================================
+   Dark mode — retrofit for existing Tailwind utility classes.
+   Toggled by adding/removing the "dark" class on <html> (see
+   the theme script in base.html / login.html). Scoping the
+   overrides to the exact classes already used across the app
+   means every existing page gets a dark theme without having
+   to rewrite each template's class list by hand.
+   ============================================================ */
+html.dark { color-scheme: dark; }
+
+html.dark body { background-color: #0f172a; color: #e2e8f0; }
+body { background-color: var(--page-background, #f1f5f9); }
+.bg-white, .bg-slate-900 { background-color: var(--panel-background, #ffffff) !important; }
+table thead { background-color: var(--table-header, #1e293b) !important; }
+table tbody tr { background-color: var(--table-row, #172033) !important; }
+table tbody tr:nth-child(even) { background-color: color-mix(in srgb, var(--table-row, #172033) 88%, #ffffff) !important; }
+table tbody tr:hover { background-color: #243b5a !important; }
+
+.admin-users-table { border: 1px solid #334155; border-radius: 8px; overflow: hidden; }
+.admin-users-table table { border-collapse: separate; border-spacing: 0; }
+.admin-users-table thead { background-color: #334155 !important; color: #f8fafc; }
+.admin-users-table tbody tr { background-color: #1e293b !important; transition: background-color .16s ease; }
+.admin-users-table tbody tr:nth-child(even) { background-color: #243247 !important; }
+.admin-users-table tbody tr:hover { background-color: #31506f !important; }
+.admin-users-table tbody td { border-bottom: 1px solid #334155; }
+.admin-users-table tbody tr:last-child td { border-bottom: 0; }
+
+html:not(.dark) .admin-users-table { border-color: #cbd5e1; }
+html:not(.dark) .admin-users-table thead { background-color: #e2e8f0 !important; color: #1e293b; }
+html:not(.dark) .admin-users-table tbody tr { background-color: #ffffff !important; }
+html:not(.dark) .admin-users-table tbody tr:nth-child(even) { background-color: #f8fafc !important; }
+html:not(.dark) .admin-users-table tbody tr:hover { background-color: #e0f2fe !important; }
+html:not(.dark) .admin-users-table tbody td { border-bottom-color: #e2e8f0; }
+
+.dashboard-control-deck > .dashboard-control-section + form > .dashboard-control-section {
+  border-top: 1px solid #303033;
+}
+
+.report-filter-form {
+  display: grid;
+  grid-template-columns: auto minmax(280px, 1fr);
+  align-items: end;
+  gap: 1rem;
+}
+
+.report-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.report-filter-form input {
+  min-height: 38px;
+}
+
+@media (max-width: 640px) {
+  .report-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .report-filter-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 768px) {
+  .dashboard-filter-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 2.2fr) repeat(4, minmax(0, 1fr)) auto;
+    align-items: end;
+  }
+
+  .dashboard-filter-actions {
+    white-space: nowrap;
+  }
+}
+
+/* Keep the dashboard's two-row table header visible while scrolling. */
+.table-freeze-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.table-freeze-header th {
+  background-color: var(--table-header, #1e293b) !important;
+}
+
+.document-table-scroll {
+  height: calc(100vh - 14rem);
+  max-height: none;
+  overflow-x: scroll;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: auto;
+  scrollbar-color: #a1a1aa #27272a;
+}
+body:has(#dashboardControlDeck.dashboard-controls-collapsed) .document-table-scroll { height: calc(100vh - 8rem); }
+.dashboard-document-table { min-width: 1700px; }
+.dashboard-document-table tbody tr { cursor: pointer; transition: background-color .16s ease, box-shadow .16s ease; }
+.dashboard-document-table tbody tr:hover { background-color: #1d3557 !important; box-shadow: inset 3px 0 0 #38bdf8; }
+html:not(.dark) .dashboard-document-table tbody tr:hover { background-color: #e0f2fe !important; box-shadow: inset 3px 0 0 #0284c7; }
+.document-table-scroll::-webkit-scrollbar { width: 14px; height: 14px; }
+.document-table-scroll::-webkit-scrollbar-track { background: #27272a; border-left: 1px solid #3f3f46; }
+.document-table-scroll::-webkit-scrollbar-thumb { min-height: 48px; border: 3px solid #27272a; border-radius: 8px; background: #a1a1aa; }
+.document-table-scroll::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+.color-picker { width: 42px; height: 30px; padding: 2px; border: 1px solid #94a3b8; border-radius: 5px; cursor: pointer; }
+html.dark body, html.dark nav, html.dark .bg-slate-900, html.dark .bg-slate-800 { background-color: #0b0b0c !important; }
+html.dark .bg-slate-700, html.dark .bg-slate-600 { background-color: #171719 !important; }
+html.dark .border-slate-800, html.dark .border-slate-700 { border-color: #303033 !important; }
+html.dark .text-green-400, html.dark .text-blue-400, html.dark .text-cyan-400 { color: #f5f5f5 !important; }
+html.dark .bg-green-600, html.dark .bg-blue-600 { background-color: #f5f5f5 !important; color: #09090b !important; }
+html.dark .hover\:bg-green-500:hover, html.dark .hover\:bg-blue-700:hover { background-color: #d4d4d8 !important; }
+.nav-active { color: #ff0000 !important; font-weight: 700; border-bottom: 2px solid #ff0000; padding-bottom: 4px; }
+.report-subject { display: block; max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-button { border: 1px solid #52525b; background: #18181b; color: #f4f4f5; border-radius: 5px; padding: 4px 8px; font-size: 12px; }
+.audit-button:hover { background: #3f3f46; }
+.audit-dialog { background: #111113; border: 1px solid #3f3f46; color: #f4f4f5; }
+.audit-entry { border-bottom: 1px solid #27272a; padding: 0 0 16px; margin-bottom: 16px; }
+.audit-meta { color: #fff; font-weight: 700; margin-bottom: 10px; }
+.audit-meta span { color: #a1a1aa; font-size: 12px; font-weight: 400; float: right; }
+.audit-version h3 { color: #d4d4d8; font-size: 13px; margin-bottom: 8px; }
+.audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px; }
+.audit-field { border: 1px solid #27272a; border-radius: 4px; padding: 7px; display: flex; flex-direction: column; gap: 2px; }
+.audit-field span { color: #a1a1aa; font-size: 11px; }
+.audit-field strong { font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+.audit-field em { color: #f87171; font-size: 11px; font-style: normal; }
+.audit-changed { border-color: #dc2626; background: rgba(127, 29, 29, .18); }
+@media (max-width: 640px) { .audit-meta span { float: none; display: block; margin-top: 3px; } }
+
+/* page background */
+html.dark .bg-slate-100 { background-color: #0f172a !important; }
+html.dark .bg-slate-50  { background-color: #1e293b !important; }
+
+/* cards / panels */
+html.dark .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+html.dark .shadow, html.dark .shadow-xl { box-shadow: 0 1px 3px rgba(0,0,0,.6), 0 1px 2px rgba(0,0,0,.4) !important; }
+
+.document-form input,
+.document-form select,
+.document-form textarea {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+.document-form input:focus,
+.document-form select:focus,
+.document-form textarea:focus {
+  border-color: #4ade80 !important;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, .18) !important;
+  outline: none;
+}
+.document-form input[readonly] {
+  background-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+html:not(.dark) .document-form input,
+html:not(.dark) .document-form select,
+html:not(.dark) .document-form textarea {
+  background-color: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #1e293b !important;
+}
+html:not(.dark) .document-form input[readonly] {
+  background-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+/* text colors */
+html.dark .text-slate-800 { color: #f1f5f9 !important; }
+html.dark .text-slate-700 { color: #e2e8f0 !important; }
+html.dark .text-slate-600 { color: #cbd5e1 !important; }
+html.dark .text-slate-500 { color: #94a3b8 !important; }
+html.dark .text-slate-400 { color: #64748b !important; }
+html.dark .text-slate-300 { color: #cbd5e1 !important; }
+
+/* borders / dividers */
+html.dark .border,
+html.dark table,
+html.dark th, html.dark td { border-color: #334155 !important; }
+html.dark .divide-y > * + * { border-color: #334155 !important; }
+
+/* table header row */
+html.dark thead.bg-slate-100 { background-color: #273449 !important; }
+html.dark tr.hover\:bg-slate-50:hover { background-color: #24344d !important; }
+
+/* form controls */
+html.dark input, html.dark select, html.dark textarea {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b; }
+html.dark input:disabled, html.dark input[readonly] { background-color: #1e293b !important; color: #94a3b8 !important; }
+html.dark code { background-color: #0f172a !important; color: #cbd5e1; }
+
+/* flash / status banners keep their hue but darken the background */
+html.dark .bg-green-100 { background-color: rgba(34,197,94,.15) !important; color: #86efac !important; border-color: rgba(34,197,94,.35) !important; }
+html.dark .text-green-700, html.dark .text-green-800, html.dark .text-green-600 { color: #86efac !important; }
+html.dark .bg-red-100 { background-color: rgba(239,68,68,.15) !important; color: #fca5a5 !important; border-color: rgba(239,68,68,.35) !important; }
+html.dark .text-red-700, html.dark .text-red-800, html.dark .text-red-600 { color: #fca5a5 !important; }
+html.dark .bg-orange-100 { background-color: rgba(249,115,22,.15) !important; color: #fdba74 !important; }
+html.dark .text-orange-700 { color: #fdba74 !important; }
+html.dark .bg-blue-100 { background-color: rgba(59,130,246,.15) !important; color: #93c5fd !important; }
+html.dark .text-blue-600, html.dark .text-blue-300 { color: #93c5fd !important; }
+
+/* modal overlay content already uses bg-white -> handled above */
+html.dark .bg-black\/50 { background-color: rgba(0,0,0,.7) !important; }
+
+/* theme toggle button */
+.theme-toggle-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 9999px;
+  background-color: rgba(255,255,255,.08); cursor: pointer; border: none;
+  font-size: 15px; line-height: 1;
+}
+.theme-toggle-btn:hover { background-color: rgba(255,255,255,.18); }
+
+.lookup-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(248, 113, 113, .35);
+  border-radius: 6px;
+  color: #f87171;
+  background: rgba(127, 29, 29, .18);
+  cursor: pointer;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease;
+}
+.lookup-delete-button:hover { color: #fff; background: #dc2626; border-color: #f87171; }
+html:not(.dark) .lookup-delete-button { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
+html:not(.dark) .lookup-delete-button:hover { color: #fff; background: #dc2626; border-color: #dc2626; }
